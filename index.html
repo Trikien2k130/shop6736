@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Auth demo</title>
+</head>
+<body>
+  <h2>Auth</h2>
+
+  <input id="email" placeholder="email">
+  <input id="pass" type="password" placeholder="password">
+
+  <button id="signup">Sign up</button>
+  <button id="login">Login</button>
+  <button id="logout">Logout</button>
+
+  <pre id="status"></pre>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import {
+      getAuth, createUserWithEmailAndPassword,
+      signInWithEmailAndPassword, signOut, onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDfge8mXfEn_PgmrK3HYtNzOsbSdShn6_g",
+      authDomain: "skibidi-37b6d.firebaseapp.com",
+      projectId: "skibidi-37b6d",
+      appId: "1:1087339530724:web:1a175582477528c8a99ff1"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const status = document.getElementById("status");
+
+    document.getElementById("signup").onclick = async () => {
+      const email = emailEl.value, pass = passEl.value;
+      try {
+        await createUserWithEmailAndPassword(auth, email, pass);
+        status.textContent = "Signed up";
+      } catch (e) { status.textContent = e.message; }
+    };
+
+    document.getElementById("login").onclick = async () => {
+      const email = emailEl.value, pass = passEl.value;
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+        status.textContent = "Logged in";
+      } catch (e) { status.textContent = e.message; }
+    };
+
+    document.getElementById("logout").onclick = async () => {
+      await signOut(auth);
+      status.textContent = "Logged out";
+    };
+
+    const emailEl = document.getElementById("email");
+    const passEl = document.getElementById("pass");
+
+    onAuthStateChanged(auth, (user) => {
+      status.textContent = user ? ("User: " + user.email) : "Not logged in";
+    });
+  </script>
+</body>
+</html>
