@@ -125,7 +125,6 @@
         const db = getFirestore(app); 
         const ADMIN_EMAIL = "trikien14012013@gmail.com";  
 
-        // --- AUTH --- 
         window.handleAuth = async (type) => { 
             const email = document.getElementById('email').value; 
             const pass = document.getElementById('password').value; 
@@ -141,8 +140,6 @@
                 document.getElementById('auth-section').classList.add('hidden'); 
                 document.getElementById('main-content').classList.remove('hidden'); 
                 document.getElementById('user-email').innerText = user.email; 
-                
-                // Chỉ mail này mới hiện Admin Panel
                 if (user.email === ADMIN_EMAIL) { 
                     document.getElementById('admin-panel').classList.remove('hidden'); 
                     loadAdminData(); 
@@ -158,7 +155,6 @@
             } 
         }); 
 
-        // --- ADMIN: GIAN HÀNG --- 
         window.addBooth = async () => { 
             const name = document.getElementById('booth-name').value; 
             const image = document.getElementById('booth-image').value; 
@@ -172,7 +168,6 @@
             loadUserShop(); 
         }; 
 
-        // --- ADMIN: MẶT HÀNG --- 
         window.generateInputs = () => { 
             const stock = parseInt(document.getElementById('asset-stock').value) || 0; 
             const container = document.getElementById('inputs-container'); 
@@ -201,33 +196,24 @@
             const inputs = document.querySelectorAll('.input-item-data'); 
             let newContents = []; 
             inputs.forEach(input => { if(input.value) newContents.push(input.value); }); 
-            
             if(!boothId || newContents.length === 0) return; 
-            
             const boothRef = doc(db, "assets", boothId); 
             const boothSnap = await getDoc(boothRef); 
             const currentContents = boothSnap.data().contents || []; 
             const updatedContents = currentContents.concat(newContents); 
-
-            await updateDoc(boothRef, {  
-                contents: updatedContents, 
-                stock: updatedContents.length  
-            }); 
-
+            await updateDoc(boothRef, { contents: updatedContents, stock: updatedContents.length }); 
             document.getElementById('asset-stock').value = ''; 
             document.getElementById('inputs-container').innerHTML = ''; 
             loadAdminData(); 
             loadUserShop(); 
         }; 
 
-        // --- LOAD DATA --- 
         async function loadAdminData() { 
             const snap = await getDocs(collection(db, "assets")); 
             const select = document.getElementById('select-booth'); 
             const adminList = document.getElementById('admin-booth-list'); 
             select.innerHTML = '<option value="">-- Chọn Gian Hàng --</option>'; 
             adminList.innerHTML = ''; 
-
             snap.forEach(d => { 
                 const data = d.data(); 
                 select.innerHTML += `<option value="${d.id}">${data.name} (Kho: ${data.stock})</option>`; 
@@ -251,13 +237,11 @@
             const snap = await getDocs(collection(db, "assets")); 
             const container = document.getElementById('user-asset-list'); 
             container.innerHTML = ''; 
-            
             snap.forEach(d => { 
                 const data = d.data(); 
                 const stock = data.stock || 0; 
                 const isAdmin = auth.currentUser?.email === ADMIN_EMAIL; 
                 if (stock <= 0 && !isAdmin) return; 
-
                 container.innerHTML += ` 
                     <div class="card bg-white p-5 rounded-xl border border-slate-200 relative overflow-hidden"> 
                         ${stock <= 0 ? '<div class="absolute inset-0 bg-white/60 flex items-center justify-center font-bold text-red-500 z-10">HẾT HÀNG</div>' : ''} 
@@ -266,26 +250,20 @@
                             <h4 class="text-lg font-bold text-gray-800">${data.name}</h4> 
                             <span class="text-xs font-bold px-2 py-1 bg-blue-100 text-blue-600 rounded">KHO: ${stock}</span> 
                         </div> 
-                        <button onclick="handleBuy('${d.id}', '${data.linkType}')"  
-                                class="w-full mt-4 bg-slate-800 text-white py-2 rounded-lg hover:bg-black transition"> 
-                            Vượt Link Nhận Hàng 
-                        </button> 
+                        <button onclick="handleBuy('${d.id}')" class="w-full mt-4 bg-slate-800 text-white py-2 rounded-lg hover:bg-black transition">Vượt Link Nhận Hàng</button> 
                     </div>`; 
             }); 
         } 
 
-        // --- LOGIC MUA & CHECK --- 
-        window.handleBuy = (id, linkType) => { 
+        window.handleBuy = (id) => { 
             localStorage.setItem('pending_asset_id', id); 
-            const shortlinkUrl = `https://link4sub.com/wz9avd6mqg`; 
-            window.location.href = shortlinkUrl; // Redirect luôn ko alert
+            window.location.href = `https://link4sub.com/wz9avd6mqg`; 
         }; 
 
         async function checkVerification() { 
             const urlParams = new URLSearchParams(window.location.search); 
             const verifyToken = urlParams.get('verify'); 
             const assetId = localStorage.getItem('pending_asset_id'); 
-
             if (verifyToken === "TOKEN" && assetId) {  
                 const assetRef = doc(db, "assets", assetId); 
                 const assetSnap = await getDoc(assetRef); 
@@ -294,15 +272,12 @@
                     if (contents.length > 0) { 
                         const reward = contents.shift();  
                         await updateDoc(assetRef, { contents: contents, stock: contents.length }); 
-                        
-                        // Lưu lịch sử vào Firebase
                         await addDoc(collection(db, "history"), { 
                             uid: auth.currentUser.uid, 
                             title: assetSnap.data().name, 
                             reward: reward, 
                             time: serverTimestamp() 
                         }); 
-
                         window.showReward(reward); 
                         localStorage.removeItem('pending_asset_id'); 
                         window.history.replaceState({}, document.title, window.location.pathname); 
@@ -319,13 +294,19 @@
         } 
 
         async function loadHistory() { 
-            if (!auth.currentUser) return;
-            const q = query(collection(db, "history"), where("uid", "==", auth.currentUser.uid), orderBy("time", "desc")); 
+            if (!auth.currentUser) return; 
+            // Query đơn giản để tránh lỗi thiếu Index (Sắp xếp bằng JS sau)
+            const q = query(collection(db, "history"), where("uid", "==", auth.currentUser.uid)); 
             const snap = await getDocs(q); 
             const container = document.getElementById('history-list'); 
             container.innerHTML = ''; 
-            snap.forEach(d => { 
-                const data = d.data(); 
+            
+            let docs = [];
+            snap.forEach(d => docs.push(d.data()));
+            // Sắp xếp theo thời gian mới nhất
+            docs.sort((a, b) => (b.time?.seconds || 0) - (a.time?.seconds || 0));
+
+            docs.forEach(data => { 
                 container.innerHTML += ` 
                     <div class="border-b border-white/10 pb-2 flex justify-between items-center"> 
                         <span>> ${data.title}</span> 
