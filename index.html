@@ -21,6 +21,12 @@
             <h2 class="text-xl font-bold mb-4">Đăng nhập hệ thống</h2> 
             <input type="email" id="email" placeholder="Email" class="border p-2 w-full mb-3 rounded"> 
             <input type="password" id="password" placeholder="Mật khẩu" class="border p-2 w-full mb-4 rounded"> 
+            
+            <div class="flex items-center gap-2 mb-4 bg-white p-2 rounded border">
+                <input type="checkbox" id="bot-verify" class="w-4 h-4 cursor-pointer">
+                <label for="bot-verify" class="text-sm text-gray-600 cursor-pointer">Tôi không phải là bot</label>
+            </div>
+
             <div class="flex gap-2"> 
                 <button onclick="handleAuth('login')" class="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Đăng nhập</button> 
                 <button onclick="handleAuth('register')" class="flex-1 bg-gray-500 text-white py-2 rounded hover:bg-gray-600">Đăng ký</button> 
@@ -67,6 +73,14 @@
                         <div class="space-y-3"> 
                             <input type="text" id="booth-name" placeholder="Tên gian hàng" class="w-full border p-2 rounded"> 
                             <input type="text" id="booth-image" placeholder="Ảnh" class="w-full border p-2 rounded text-sm"> 
+                            
+                            <div id="booth-links-wrapper" class="space-y-2 border-t pt-2 mt-2">
+                                <p class="text-xs font-bold text-gray-500 uppercase">Danh sách link rút gọn:</p>
+                                <div id="booth-links-container" class="space-y-2">
+                                    </div>
+                                <button onclick="addLinkInput()" class="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded hover:bg-blue-200">+ Thêm ô nhập link</button>
+                            </div>
+
                             <select id="booth-link-type" class="w-full border p-2 rounded"> 
                                 <option value="link4sub">Link: Link4Sub</option> 
                                 <option value="link4m">Link: Link4M</option> 
@@ -128,6 +142,13 @@
         window.handleAuth = async (type) => { 
             const email = document.getElementById('email').value; 
             const pass = document.getElementById('password').value; 
+            const isVerified = document.getElementById('bot-verify').checked;
+
+            if (!isVerified) {
+                alert("Vui lòng xác nhận bạn không phải là robot!");
+                return;
+            }
+
             try { 
                 if (type === 'login') await signInWithEmailAndPassword(auth, email, pass); 
                 else await createUserWithEmailAndPassword(auth, email, pass); 
@@ -155,15 +176,40 @@
             } 
         }); 
 
+        // Hàm thêm ô nhập link mới
+        window.addLinkInput = () => {
+            const container = document.getElementById('booth-links-container');
+            const div = document.createElement('div');
+            div.className = "flex gap-1 items-center bg-white p-1 rounded border link-input-group";
+            div.innerHTML = `
+                <input type="text" placeholder="Tên Link" class="link-name flex-1 text-xs p-1 border rounded">
+                <input type="text" placeholder="Dán Link" class="link-url flex-1 text-xs p-1 border rounded">
+                <button onclick="this.parentElement.remove()" class="text-red-500 font-bold px-2">×</button>
+            `;
+            container.appendChild(div);
+        };
+
         window.addBooth = async () => { 
             const name = document.getElementById('booth-name').value; 
             const image = document.getElementById('booth-image').value; 
             const linkType = document.getElementById('booth-link-type').value; 
+            
+            // Thu thập danh sách link rút gọn
+            const linkGroups = document.querySelectorAll('.link-input-group');
+            const customLinks = [];
+            linkGroups.forEach(group => {
+                const lName = group.querySelector('.link-name').value;
+                const lUrl = group.querySelector('.link-url').value;
+                if(lName && lUrl) customLinks.push({ name: lName, url: lUrl });
+            });
+
             if(!name) return; 
             await addDoc(collection(db, "assets"), { 
-                name, image, linkType, contents: [], stock: 0, createdAt: serverTimestamp() 
+                name, image, linkType, customLinks, contents: [], stock: 0, createdAt: serverTimestamp() 
             }); 
             document.getElementById('booth-name').value = ''; 
+            document.getElementById('booth-image').value = '';
+            document.getElementById('booth-links-container').innerHTML = '';
             loadAdminData(); 
             loadUserShop(); 
         }; 
@@ -295,16 +341,14 @@
 
         async function loadHistory() { 
             if (!auth.currentUser) return; 
-            // Query đơn giản để tránh lỗi thiếu Index (Sắp xếp bằng JS sau)
             const q = query(collection(db, "history"), where("uid", "==", auth.currentUser.uid)); 
             const snap = await getDocs(q); 
             const container = document.getElementById('history-list'); 
             container.innerHTML = ''; 
             
-            let docs = [];
-            snap.forEach(d => docs.push(d.data()));
-            // Sắp xếp theo thời gian mới nhất
-            docs.sort((a, b) => (b.time?.seconds || 0) - (a.time?.seconds || 0));
+            let docs = []; 
+            snap.forEach(d => docs.push(d.data())); 
+            docs.sort((a, b) => (b.time?.seconds || 0) - (a.time?.seconds || 0)); 
 
             docs.forEach(data => { 
                 container.innerHTML += ` 
