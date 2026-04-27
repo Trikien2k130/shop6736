@@ -86,17 +86,20 @@
             <div id="reward-box" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
                 <div class="bg-white p-8 rounded-2xl max-w-sm w-full text-center">
                     <div class="text-5xl mb-4">🎁</div>
-                    <h3 class="text-xl font-bold mb-2">Vượt link thành công!</h3>
-                    <p class="text-gray-600 mb-4">Đây là thông tin của bạn:</p>
+                    <h3 class="text-xl font-bold mb-2">Thông tin của bạn!</h3>
+                    <p class="text-gray-600 mb-4">Vui lòng copy lại nội dung này:</p>
                     <div id="reward-text" class="bg-slate-100 p-4 rounded-lg font-mono text-blue-700 break-all mb-4"></div>
                     <button onclick="document.getElementById('reward-box').classList.add('hidden')" class="w-full bg-blue-600 text-white py-2 rounded">Đóng</button>
                 </div>
             </div>
 
             <div class="mt-12 bg-slate-900 rounded-xl p-6 text-white">
-                <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
-                    <span class="text-green-400">●</span> Lịch sử hoạt động
-                </h3>
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold flex items-center gap-2">
+                        <span class="text-green-400">●</span> Lịch sử hoạt động
+                    </h3>
+                    <span class="text-xs text-gray-400 italic">(Tự động xóa sau 1 tuần để tránh quá tải)</span>
+                </div>
                 <div id="history-list" class="space-y-2 font-mono text-sm h-40 overflow-y-auto text-gray-300">
                 </div>
             </div>
@@ -106,7 +109,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where, serverTimestamp, updateDoc, increment, getDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where, serverTimestamp, updateDoc, increment, getDoc, orderBy } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDfge8mXfEn_PgmrK3HYtNzOsbSdShn6_g",
@@ -121,7 +124,6 @@
 
         const ADMIN_EMAIL = "trikien14012013@gmail.com"; 
 
-        // Hàm tạo các ô nhập liệu dựa trên số lượng
         window.generateInputs = () => {
             const stock = parseInt(document.getElementById('asset-stock').value) || 0;
             const container = document.getElementById('inputs-container');
@@ -131,7 +133,6 @@
             }
         };
 
-        // Hàm đọc file .txt
         window.handleFileUpload = () => {
             const file = document.getElementById('file-upload').files[0];
             if (!file) return;
@@ -183,18 +184,13 @@
             const inputs = document.querySelectorAll('.input-item-data');
             const type = document.getElementById('asset-type').value;
             const linkType = document.getElementById('link-type').value;
-
-            // Gom toàn bộ nội dung trong các ô thành mảng
             let contents = [];
             inputs.forEach(input => { if(input.value) contents.push(input.value); });
-
             if (!name || isNaN(stock) || contents.length === 0) return alert("Điền đủ thông tin!");
-
             await addDoc(collection(db, "assets"), {
                 name, stock, contents, type, linkType,
                 createdAt: serverTimestamp()
             });
-
             document.getElementById('asset-name').value = '';
             document.getElementById('asset-stock').value = '';
             document.getElementById('inputs-container').innerHTML = '';
@@ -209,7 +205,7 @@
             snap.forEach(d => {
                 const data = d.data();
                 container.innerHTML += `
-                    <div class="bg-white p-3 border rounded shadow-sm flex flex-col gap-1">
+                    <div class="bg-white p-3 border rounded shadow-sm flex flex-col gap-1 text-black">
                         <div class="flex justify-between font-bold">
                             <span>[${data.type.toUpperCase()}] ${data.name}</span>
                             <span class="text-red-500">Kho: ${data.contents ? data.contents.length : 0}</span>
@@ -237,7 +233,6 @@
                 const data = d.data();
                 const stock = data.contents ? data.contents.length : 0;
                 if (stock <= 0) return; 
-
                 container.innerHTML += `
                     <div class="card bg-white p-5 rounded-xl border border-slate-200">
                         <div class="flex justify-between items-start mb-3">
@@ -255,8 +250,6 @@
 
         window.handleBuy = (id, linkType) => {
             localStorage.setItem('pending_asset_id', id);
-            const token = "TRIKIEN_" + Math.random().toString(36).substring(7).toUpperCase();
-            localStorage.setItem('pending_verify', token);
             const shortlinkUrl = `https://link4sub.com/wz9avd6mqg`; 
             alert(`Đang chuyển hướng qua ${linkType}...`);
             window.location.href = shortlinkUrl;
@@ -270,23 +263,20 @@
             if (verifyToken === "TOKEN" && assetId) { 
                 const assetRef = doc(db, "assets", assetId);
                 const assetSnap = await getDoc(assetRef);
-
                 if (assetSnap.exists()) {
                     let data = assetSnap.data();
                     let contents = data.contents || [];
-
                     if (contents.length > 0) {
-                        const reward = contents.shift(); // Lấy món đầu tiên ra
+                        const reward = contents.shift(); 
                         await updateDoc(assetRef, { contents: contents, stock: contents.length });
-
-                        document.getElementById('reward-box').classList.remove('hidden');
-                        document.getElementById('reward-text').innerText = reward;
+                        
+                        window.showReward(reward);
 
                         await addDoc(collection(db, "history"), {
                             uid: auth.currentUser.uid,
                             email: auth.currentUser.email,
-                            content: `Nhận thành công 1 món từ: ${data.name}`,
-                            type: "SUCCESS",
+                            title: data.name,
+                            reward: reward,
                             time: serverTimestamp()
                         });
 
@@ -299,16 +289,28 @@
             }
         }
 
+        window.showReward = (text) => {
+            document.getElementById('reward-box').classList.remove('hidden');
+            document.getElementById('reward-text').innerText = text;
+        }
+
         async function loadHistory() {
-            const q = query(collection(db, "history"), where("uid", "==", auth.currentUser.uid));
+            const q = query(collection(db, "history"), where("uid", "==", auth.currentUser.uid), orderBy("time", "desc"));
             const snap = await getDocs(q);
             const container = document.getElementById('history-list');
             container.innerHTML = '';
             snap.forEach(d => {
                 const data = d.data();
-                container.innerHTML += `<p class="border-b border-white/10 pb-1">> ${data.content}</p>`;
+                const itemDiv = document.createElement('div');
+                itemDiv.className = "border-b border-white/10 pb-2 flex justify-between items-center";
+                itemDiv.innerHTML = `
+                    <span>> Nhận: ${data.title}</span>
+                    <button onclick="showReward('${data.reward}')" class="text-xs bg-blue-600 px-2 py-1 rounded hover:bg-blue-700">Xem lại</button>
+                `;
+                container.appendChild(itemDiv);
             });
         }
+        window.showReward = window.showReward;
     </script>
 </body>
 </html>
