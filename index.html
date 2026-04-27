@@ -1,328 +1,338 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shop cc - Admin Panel</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .hidden { display: none; }
-        .card { border: 1px solid #e2e8f0; transition: all 0.3s; }
-        .card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
-        .input-item { font-size: 12px; padding: 4px; border: 1px solid #ccc; border-radius: 4px; width: 100%; }
-    </style>
-</head>
-<body class="bg-slate-50 p-4 md:p-8">
+<!DOCTYPE html> 
+<html lang="vi"> 
+<head> 
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>Shop cc - Admin Panel</title> 
+    <script src="https://cdn.tailwindcss.com"></script> 
+    <style> 
+        .hidden { display: none; } 
+        .card { border: 1px solid #e2e8f0; transition: all 0.3s; } 
+        .card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); } 
+        .input-item { font-size: 12px; padding: 4px; border: 1px solid #ccc; border-radius: 4px; width: 100%; } 
+    </style> 
+</head> 
+<body class="bg-slate-50 p-4 md:p-8"> 
 
-    <div id="app" class="max-w-6xl mx-auto bg-white p-6 rounded-2xl shadow-xl">
-        <h1 class="text-3xl font-extrabold mb-8 text-center text-blue-600">HỆ THỐNG QUẢN LÝ SHOP</h1>
+    <div id="app" class="max-w-6xl mx-auto bg-white p-6 rounded-2xl shadow-xl"> 
+        <h1 class="text-3xl font-extrabold mb-8 text-center text-blue-600">HỆ THỐNG QUẢN LÝ SHOP</h1> 
 
-        <div id="auth-section" class="max-w-md mx-auto bg-slate-100 p-6 rounded-xl">
-            <h2 class="text-xl font-bold mb-4">Đăng nhập hệ thống</h2>
-            <input type="email" id="email" placeholder="Email" class="border p-2 w-full mb-3 rounded">
-            <input type="password" id="password" placeholder="Mật khẩu" class="border p-2 w-full mb-4 rounded">
-            <div class="flex gap-2">
-                <button onclick="handleAuth('login')" class="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Đăng nhập</button>
-                <button onclick="handleAuth('register')" class="flex-1 bg-gray-500 text-white py-2 rounded hover:bg-gray-600">Đăng ký</button>
-            </div>
-        </div>
+        <div id="auth-section" class="max-w-md mx-auto bg-slate-100 p-6 rounded-xl"> 
+            <h2 class="text-xl font-bold mb-4">Đăng nhập hệ thống</h2> 
+            <input type="email" id="email" placeholder="Email" class="border p-2 w-full mb-3 rounded"> 
+            <input type="password" id="password" placeholder="Mật khẩu" class="border p-2 w-full mb-4 rounded"> 
+            <div class="flex gap-2"> 
+                <button onclick="handleAuth('login')" class="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Đăng nhập</button> 
+                <button onclick="handleAuth('register')" class="flex-1 bg-gray-500 text-white py-2 rounded hover:bg-gray-600">Đăng ký</button> 
+            </div> 
+        </div> 
 
-        <div id="main-content" class="hidden">
-            <div class="flex justify-between items-center mb-8 border-b pb-4">
-                <p class="text-gray-600">Tài khoản: <span id="user-email" class="font-bold text-blue-600"></span></p>
-                <button onclick="logout()" class="bg-red-100 text-red-600 px-4 py-1 rounded-full hover:bg-red-200 transition">Đăng xuất</button>
-            </div>
+        <div id="main-content" class="hidden"> 
+            <div class="flex justify-between items-center mb-8 border-b pb-4"> 
+                <p class="text-gray-600">Tài khoản: <span id="user-email" class="font-bold text-blue-600"></span></p> 
+                <button onclick="logout()" class="bg-red-100 text-red-600 px-4 py-1 rounded-full hover:bg-red-200 transition">Đăng xuất</button> 
+            </div> 
 
-            <div id="admin-panel" class="hidden mb-10">
-                <h2 class="text-2xl font-bold text-blue-600 mb-4 flex items-center gap-2">
-                    <span>🛠️</span> QUẢN TRỊ VIÊN
-                </h2>
+            <div id="admin-panel" class="hidden mb-10"> 
+                <h2 class="text-2xl font-bold text-blue-600 mb-4 flex items-center gap-2"> 
+                    <span>🛠️</span> QUẢN TRỊ VIÊN 
+                </h2> 
                 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="bg-blue-50 p-6 rounded-xl border border-blue-100">
-                        <h3 class="font-bold mb-4 text-blue-700">Thêm Mặt Hàng</h3>
-                        <div class="space-y-3">
-                            <select id="select-booth" class="w-full border p-2 rounded font-bold text-blue-600">
-                                <option value="">-- Chọn Gian Hàng --</option>
-                            </select>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6"> 
+                    <div class="bg-blue-50 p-6 rounded-xl border border-blue-100"> 
+                        <h3 class="font-bold mb-4 text-blue-700">Thêm Mặt Hàng</h3> 
+                        <div class="space-y-3"> 
+                            <select id="select-booth" class="w-full border p-2 rounded font-bold text-blue-600"> 
+                                <option value="">-- Chọn Gian Hàng --</option> 
+                            </select> 
                             
-                            <div class="flex gap-2">
-                                <input type="number" id="asset-stock" oninput="generateInputs()" placeholder="Số lượng" class="flex-1 border p-2 rounded">
-                                <label class="bg-blue-500 text-white px-3 py-2 rounded cursor-pointer text-xs flex items-center">
-                                    UP FILE .TXT
-                                    <input type="file" id="file-upload" accept=".txt" multiple class="hidden" onchange="handleFileUpload()">
-                                </label>
-                            </div>
+                            <div class="flex gap-2"> 
+                                <input type="number" id="asset-stock" oninput="generateInputs()" placeholder="Số lượng" class="flex-1 border p-2 rounded"> 
+                                <label class="bg-green-600 text-white px-3 py-2 rounded cursor-pointer text-sm"> 
+                                    Upload File .txt 
+                                    <input type="file" id="file-upload" accept=".txt" multiple class="hidden" onchange="handleFileUpload()"> 
+                                </label> 
+                            </div> 
 
-                            <div id="inputs-container" class="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto border p-2 bg-white rounded">
-                                <p class="text-gray-400 text-xs col-span-2 text-center">Nhập thủ công hoặc up file</p>
-                            </div>
+                            <div id="inputs-container" class="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto border p-2 bg-white rounded"> 
+                                <p class="text-gray-400 text-xs col-span-2 text-center">Nhập thủ công hoặc up file</p> 
+                            </div> 
 
-                            <button onclick="addItemsToBooth()" class="w-full bg-blue-600 text-white py-2 rounded font-bold hover:bg-blue-700">NHẬP KHO</button>
-                        </div>
+                            <button onclick="addItemsToBooth()" class="w-full bg-blue-600 text-white py-2 rounded font-bold hover:bg-blue-700">NHẬP KHO</button> 
+                        </div> 
                     </div>
 
-                    <div class="bg-blue-50 p-6 rounded-xl border border-blue-100">
-                        <h3 class="font-bold mb-4 text-blue-700">Tạo Gian Hàng</h3>
-                        <div class="space-y-3">
-                            <input type="text" id="booth-name" placeholder="Tên gian hàng (VD: Blox Fruits VIP)" class="w-full border p-2 rounded">
-                            <input type="text" id="booth-image" placeholder="Link ảnh gian hàng" class="w-full border p-2 rounded text-sm">
-                            <select id="booth-link-type" class="w-full border p-2 rounded text-sm">
-                                <option value="link4sub">Loại link: Link4Sub</option>
-                                <option value="link4m">Loại link: Link4M</option>
-                            </select>
-                            <button onclick="addBooth()" class="w-full bg-blue-600 text-white py-2 rounded font-bold hover:bg-blue-700">THÊM GIAN HÀNG</button>
-                        </div>
-                        <div id="admin-booth-list" class="mt-4 space-y-2 max-h-32 overflow-y-auto"></div>
-                    </div>
-                </div>
-            </div>
+                    <div class="bg-blue-50 p-6 rounded-xl border border-blue-100"> 
+                        <h3 class="font-bold mb-4 text-blue-700">Tạo Gian Hàng</h3> 
+                        <div class="space-y-3"> 
+                            <input type="text" id="booth-name" placeholder="Tên gian hàng (VD: Blox Fruits VIP)" class="w-full border p-2 rounded"> 
+                            <input type="text" id="booth-image" placeholder="Link ảnh gian hàng" class="w-full border p-2 rounded text-sm"> 
+                            <select id="booth-link-type" class="w-full border p-2 rounded"> 
+                                <option value="link4sub">Link: Link4Sub</option> 
+                                <option value="link4m">Link: Link4M</option> 
+                            </select> 
+                            <button onclick="addBooth()" class="w-full bg-blue-600 text-white py-2 rounded font-bold hover:bg-blue-700">THÊM GIAN HÀNG</button> 
+                        </div> 
+                        <div id="admin-booth-list" class="mt-4 space-y-2 max-h-40 overflow-y-auto"> 
+                        </div> 
+                    </div> 
+                </div> 
+            </div> 
 
-            <div class="mb-10">
-                <h3 class="text-2xl font-bold mb-6 text-gray-800 border-l-4 border-blue-600 pl-3">Cửa Hàng Sản Phẩm</h3>
-                <div id="user-asset-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-            </div>
+            <div class="mb-10"> 
+                <h3 class="text-2xl font-bold mb-6 text-gray-800 border-l-4 border-blue-600 pl-3">Cửa Hàng Sản Phẩm</h3> 
+                <div id="user-asset-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"> 
+                </div> 
+            </div> 
 
-            <div id="reward-box" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-                <div class="bg-white p-8 rounded-2xl max-w-sm w-full text-center shadow-2xl">
-                    <div class="text-5xl mb-4">🎁</div>
-                    <h3 class="text-xl font-bold mb-2 text-green-600">Thông tin của bạn!</h3>
-                    <p class="text-gray-600 mb-4">Vui lòng copy lại nội dung này:</p>
-                    <div id="reward-text" class="bg-slate-100 p-4 rounded-lg font-mono text-blue-700 break-all mb-4 border border-blue-200"></div>
-                    <button onclick="document.getElementById('reward-box').classList.add('hidden')" class="w-full bg-blue-600 text-white py-2 rounded font-bold">Đóng</button>
-                </div>
-            </div>
+            <div id="reward-box" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"> 
+                <div class="bg-white p-8 rounded-2xl max-w-sm w-full text-center shadow-2xl"> 
+                    <div class="text-5xl mb-4">🎁</div> 
+                    <h3 class="text-xl font-bold mb-2 text-green-600">Thông tin của bạn!</h3> 
+                    <p class="text-gray-600 mb-4">Vui lòng copy lại nội dung này:</p> 
+                    <div id="reward-text" class="bg-slate-100 p-4 rounded-lg font-mono text-blue-700 break-all mb-4 border border-blue-200"></div> 
+                    <button onclick="document.getElementById('reward-box').classList.add('hidden')" class="w-full bg-blue-600 text-white py-2 rounded">Đóng</button> 
+                </div> 
+            </div> 
 
-            <div class="mt-12 bg-slate-900 rounded-xl p-6 text-white">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-bold flex items-center gap-2">
-                        <span class="text-green-400">●</span> Lịch sử hoạt động
-                    </h3>
-                    <span class="text-xs text-gray-400 italic">(Tự động xóa sau 1 tuần)</span>
-                </div>
-                <div id="history-list" class="space-y-2 font-mono text-sm h-40 overflow-y-auto text-gray-300"></div>
-            </div>
-        </div>
-    </div>
+            <div class="mt-12 bg-slate-900 rounded-xl p-6 text-white"> 
+                <div class="flex justify-between items-center mb-4"> 
+                    <h3 class="text-lg font-bold flex items-center gap-2"> 
+                        <span class="text-green-400">●</span> Lịch sử hoạt động 
+                    </h3> 
+                    <span class="text-xs text-gray-400 italic">(Tự động xóa sau 1 tuần)</span> 
+                </div> 
+                <div id="history-list" class="space-y-2 font-mono text-sm h-40 overflow-y-auto text-gray-300"> 
+                </div> 
+            </div> 
+        </div> 
+    </div> 
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where, serverTimestamp, updateDoc, getDoc, orderBy } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+    <script type="module"> 
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js"; 
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js"; 
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where, serverTimestamp, updateDoc, getDoc, orderBy } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js"; 
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDfge8mXfEn_PgmrK3HYtNzOsbSdShn6_g",
-            authDomain: "skibidi-37b6d.firebaseapp.com",
-            projectId: "skibidi-37b6d",
-            appId: "1:1087339530724:web:1a175582477528c8a99ff1"
-        };
+        const firebaseConfig = { 
+            apiKey: "AIzaSyDfge8mXfEn_PgmrK3HYtNzOsbSdShn6_g", 
+            authDomain: "skibidi-37b6d.firebaseapp.com", 
+            projectId: "skibidi-37b6d", 
+            appId: "1:1087339530724:web:1a175582477528c8a99ff1" 
+        }; 
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const ADMIN_EMAIL = "trikien14012013@gmail.com"; 
+        const app = initializeApp(firebaseConfig); 
+        const auth = getAuth(app); 
+        const db = getFirestore(app); 
+        const ADMIN_EMAIL = "trikien14012013@gmail.com";  
 
-        window.handleAuth = async (type) => {
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('password').value;
-            try {
-                if (type === 'login') await signInWithEmailAndPassword(auth, email, pass);
-                else await createUserWithEmailAndPassword(auth, email, pass);
-            } catch (error) { alert("Lỗi: " + error.message); }
-        };
+        // --- AUTH --- 
+        window.handleAuth = async (type) => { 
+            const email = document.getElementById('email').value; 
+            const pass = document.getElementById('password').value; 
+            try { 
+                if (type === 'login') await signInWithEmailAndPassword(auth, email, pass); 
+                else await createUserWithEmailAndPassword(auth, email, pass); 
+            } catch (error) { alert("Lỗi: " + error.message); } 
+        }; 
+        window.logout = () => signOut(auth); 
 
-        window.logout = () => signOut(auth);
-
-        onAuthStateChanged(auth, (user) => {
-            const adminPanel = document.getElementById('admin-panel');
-            const authSection = document.getElementById('auth-section');
-            const mainContent = document.getElementById('main-content');
-
-            if (user) {
-                authSection.classList.add('hidden');
-                mainContent.classList.remove('hidden');
-                document.getElementById('user-email').innerText = user.email;
+        onAuthStateChanged(auth, (user) => { 
+            if (user) { 
+                document.getElementById('auth-section').classList.add('hidden'); 
+                document.getElementById('main-content').classList.remove('hidden'); 
+                document.getElementById('user-email').innerText = user.email; 
                 
-                if (user.email === ADMIN_EMAIL) {
-                    adminPanel.classList.remove('hidden');
-                    loadAdminData();
+                // Chỉ mail này mới hiện Admin Panel
+                if (user.email === ADMIN_EMAIL) { 
+                    document.getElementById('admin-panel').classList.remove('hidden'); 
+                    loadAdminData(); 
                 } else {
-                    adminPanel.classList.add('hidden'); // Ẩn nếu tài khoản khác login
+                    document.getElementById('admin-panel').classList.add('hidden');
                 }
-                loadUserShop();
-                loadHistory();
-                checkVerification();
-            } else {
-                authSection.classList.remove('hidden');
-                mainContent.classList.add('hidden');
-                adminPanel.classList.add('hidden'); // Ẩn hẳn khi logout
-            }
-        });
+                loadUserShop(); 
+                loadHistory(); 
+                checkVerification(); 
+            } else { 
+                document.getElementById('auth-section').classList.remove('hidden'); 
+                document.getElementById('main-content').classList.add('hidden'); 
+            } 
+        }); 
 
-        window.addBooth = async () => {
-            const name = document.getElementById('booth-name').value;
-            const image = document.getElementById('booth-image').value;
-            const linkType = document.getElementById('booth-link-type').value;
-            if(!name) return;
-            await addDoc(collection(db, "assets"), {
-                name, image, linkType, contents: [], stock: 0, createdAt: serverTimestamp()
-            });
-            document.getElementById('booth-name').value = '';
-            document.getElementById('booth-image').value = '';
-            loadAdminData();
-            loadUserShop();
-        };
+        // --- ADMIN: GIAN HÀNG --- 
+        window.addBooth = async () => { 
+            const name = document.getElementById('booth-name').value; 
+            const image = document.getElementById('booth-image').value; 
+            const linkType = document.getElementById('booth-link-type').value; 
+            if(!name) return; 
+            await addDoc(collection(db, "assets"), { 
+                name, image, linkType, contents: [], stock: 0, createdAt: serverTimestamp() 
+            }); 
+            document.getElementById('booth-name').value = ''; 
+            loadAdminData(); 
+            loadUserShop(); 
+        }; 
 
-        window.generateInputs = () => {
-            const stock = parseInt(document.getElementById('asset-stock').value) || 0;
-            const container = document.getElementById('inputs-container');
-            container.innerHTML = '';
-            for(let i = 1; i <= stock; i++) {
-                container.innerHTML += `<input type="text" class="input-item-data input-item" placeholder="Dòng nội dung ${i}">`;
-            }
-        };
+        // --- ADMIN: MẶT HÀNG --- 
+        window.generateInputs = () => { 
+            const stock = parseInt(document.getElementById('asset-stock').value) || 0; 
+            const container = document.getElementById('inputs-container'); 
+            container.innerHTML = ''; 
+            for(let i = 1; i <= stock; i++) { 
+                container.innerHTML += `<input type="text" class="input-item-data input-item" placeholder="Mặt hàng ${i}">`; 
+            } 
+        }; 
 
-        window.handleFileUpload = async () => {
-            const files = document.getElementById('file-upload').files;
-            let allLines = [];
-            for (let file of files) {
-                const text = await file.text();
-                const lines = text.split('\n').filter(l => l.trim() !== "");
-                allLines = allLines.concat(lines);
-            }
-            document.getElementById('asset-stock').value = allLines.length;
-            window.generateInputs();
-            const inputs = document.querySelectorAll('.input-item-data');
-            allLines.forEach((line, index) => { if(inputs[index]) inputs[index].value = line.trim(); });
-        };
+        window.handleFileUpload = async () => { 
+            const files = document.getElementById('file-upload').files; 
+            let allLines = []; 
+            for (let file of files) { 
+                const text = await file.text(); 
+                const lines = text.split('\n').filter(l => l.trim() !== ""); 
+                allLines = allLines.concat(lines); 
+            } 
+            document.getElementById('asset-stock').value = allLines.length; 
+            window.generateInputs(); 
+            const inputs = document.querySelectorAll('.input-item-data'); 
+            allLines.forEach((line, index) => { if(inputs[index]) inputs[index].value = line.trim(); }); 
+        }; 
 
-        window.addItemsToBooth = async () => {
-            const boothId = document.getElementById('select-booth').value;
-            const inputs = document.querySelectorAll('.input-item-data');
-            let newContents = [];
-            inputs.forEach(input => { if(input.value) newContents.push(input.value); });
-            if(!boothId || newContents.length === 0) return;
-            const boothRef = doc(db, "assets", boothId);
-            const boothSnap = await getDoc(boothRef);
-            const currentContents = boothSnap.data().contents || [];
-            const updatedContents = currentContents.concat(newContents);
-            await updateDoc(boothRef, { contents: updatedContents, stock: updatedContents.length });
-            document.getElementById('asset-stock').value = '';
-            document.getElementById('inputs-container').innerHTML = '';
-            loadAdminData();
-            loadUserShop();
-        };
+        window.addItemsToBooth = async () => { 
+            const boothId = document.getElementById('select-booth').value; 
+            const inputs = document.querySelectorAll('.input-item-data'); 
+            let newContents = []; 
+            inputs.forEach(input => { if(input.value) newContents.push(input.value); }); 
+            
+            if(!boothId || newContents.length === 0) return; 
+            
+            const boothRef = doc(db, "assets", boothId); 
+            const boothSnap = await getDoc(boothRef); 
+            const currentContents = boothSnap.data().contents || []; 
+            const updatedContents = currentContents.concat(newContents); 
 
-        async function loadAdminData() {
-            const snap = await getDocs(collection(db, "assets"));
-            const select = document.getElementById('select-booth');
-            const adminList = document.getElementById('admin-booth-list');
-            select.innerHTML = '<option value="">-- Chọn Gian Hàng --</option>';
-            adminList.innerHTML = '';
-            snap.forEach(d => {
-                const data = d.data();
-                select.innerHTML += `<option value="${d.id}">${data.name} (Kho: ${data.stock})</option>`;
-                adminList.innerHTML += `<div class="bg-white p-2 rounded border text-xs flex justify-between items-center text-black">
-                    <span>${data.name}</span>
-                    <button onclick="deleteBooth('${d.id}')" class="text-red-500 font-bold">XÓA</button>
-                </div>`;
-            });
-        }
+            await updateDoc(boothRef, {  
+                contents: updatedContents, 
+                stock: updatedContents.length  
+            }); 
 
-        window.deleteBooth = async (id) => {
-            if(confirm("Xóa gian hàng này?")) {
-                await deleteDoc(doc(db, "assets", id));
-                loadAdminData();
-                loadUserShop();
-            }
-        };
+            document.getElementById('asset-stock').value = ''; 
+            document.getElementById('inputs-container').innerHTML = ''; 
+            loadAdminData(); 
+            loadUserShop(); 
+        }; 
 
-        async function loadUserShop() {
-            const snap = await getDocs(collection(db, "assets"));
-            const container = document.getElementById('user-asset-list');
-            container.innerHTML = '';
-            snap.forEach(d => {
-                const data = d.data();
-                const stock = data.stock || 0;
-                const isAdmin = auth.currentUser?.email === ADMIN_EMAIL;
-                if (stock <= 0 && !isAdmin) return;
-                container.innerHTML += `
-                    <div class="card bg-white p-5 rounded-xl border border-slate-200 relative overflow-hidden">
-                        ${stock <= 0 ? '<div class="absolute inset-0 bg-white/60 flex items-center justify-center font-bold text-red-500 z-10">HẾT HÀNG</div>' : ''}
-                        ${data.image ? `<img src="${data.image}" class="w-full h-32 object-cover rounded-lg mb-4">` : ''}
-                        <div class="flex justify-between items-start mb-2">
-                            <h4 class="text-lg font-bold text-gray-800">${data.name}</h4>
-                            <span class="text-xs font-bold px-2 py-1 bg-blue-100 text-blue-600 rounded">KHO: ${stock}</span>
-                        </div>
-                        <button onclick="handleBuy('${d.id}')" class="w-full mt-4 bg-slate-800 text-white py-2 rounded-lg hover:bg-black transition">Vượt Link Nhận Hàng</button>
-                    </div>`;
-            });
-        }
+        // --- LOAD DATA --- 
+        async function loadAdminData() { 
+            const snap = await getDocs(collection(db, "assets")); 
+            const select = document.getElementById('select-booth'); 
+            const adminList = document.getElementById('admin-booth-list'); 
+            select.innerHTML = '<option value="">-- Chọn Gian Hàng --</option>'; 
+            adminList.innerHTML = ''; 
 
-        window.handleBuy = (id) => {
-            localStorage.setItem('pending_asset_id', id);
-            window.location.href = `https://link4sub.com/wz9avd6mqg`; 
-        };
+            snap.forEach(d => { 
+                const data = d.data(); 
+                select.innerHTML += `<option value="${d.id}">${data.name} (Kho: ${data.stock})</option>`; 
+                adminList.innerHTML += ` 
+                    <div class="bg-white p-2 rounded border text-sm flex justify-between items-center text-black"> 
+                        <span>${data.name}</span> 
+                        <button onclick="deleteBooth('${d.id}')" class="text-red-500">Xóa</button> 
+                    </div>`; 
+            }); 
+        } 
 
-        async function checkVerification() {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('verify') === "TOKEN") {
-                const assetId = localStorage.getItem('pending_asset_id');
-                if (!assetId) return;
+        window.deleteBooth = async (id) => { 
+            if(confirm("Xóa gian hàng này?")) { 
+                await deleteDoc(doc(db, "assets", id)); 
+                loadAdminData(); 
+                loadUserShop(); 
+            } 
+        }; 
 
-                const assetRef = doc(db, "assets", assetId);
-                const assetSnap = await getDoc(assetRef);
-                if (assetSnap.exists()) {
-                    let contents = assetSnap.data().contents || [];
-                    if (contents.length > 0) {
-                        const reward = contents.shift(); 
-                        await updateDoc(assetRef, { contents: contents, stock: contents.length });
-                        await addDoc(collection(db, "history"), {
-                            uid: auth.currentUser.uid,
-                            title: assetSnap.data().name,
+        async function loadUserShop() { 
+            const snap = await getDocs(collection(db, "assets")); 
+            const container = document.getElementById('user-asset-list'); 
+            container.innerHTML = ''; 
+            
+            snap.forEach(d => { 
+                const data = d.data(); 
+                const stock = data.stock || 0; 
+                const isAdmin = auth.currentUser?.email === ADMIN_EMAIL; 
+                if (stock <= 0 && !isAdmin) return; 
+
+                container.innerHTML += ` 
+                    <div class="card bg-white p-5 rounded-xl border border-slate-200 relative overflow-hidden"> 
+                        ${stock <= 0 ? '<div class="absolute inset-0 bg-white/60 flex items-center justify-center font-bold text-red-500 z-10">HẾT HÀNG</div>' : ''} 
+                        ${data.image ? `<img src="${data.image}" class="w-full h-32 object-cover rounded-lg mb-4">` : ''} 
+                        <div class="flex justify-between items-start mb-2"> 
+                            <h4 class="text-lg font-bold text-gray-800">${data.name}</h4> 
+                            <span class="text-xs font-bold px-2 py-1 bg-blue-100 text-blue-600 rounded">KHO: ${stock}</span> 
+                        </div> 
+                        <button onclick="handleBuy('${d.id}', '${data.linkType}')"  
+                                class="w-full mt-4 bg-slate-800 text-white py-2 rounded-lg hover:bg-black transition"> 
+                            Vượt Link Nhận Hàng 
+                        </button> 
+                    </div>`; 
+            }); 
+        } 
+
+        // --- LOGIC MUA & CHECK --- 
+        window.handleBuy = (id, linkType) => { 
+            localStorage.setItem('pending_asset_id', id); 
+            const shortlinkUrl = `https://link4sub.com/wz9avd6mqg`; 
+            window.location.href = shortlinkUrl; // Redirect luôn ko alert
+        }; 
+
+        async function checkVerification() { 
+            const urlParams = new URLSearchParams(window.location.search); 
+            const verifyToken = urlParams.get('verify'); 
+            const assetId = localStorage.getItem('pending_asset_id'); 
+
+            if (verifyToken === "TOKEN" && assetId) {  
+                const assetRef = doc(db, "assets", assetId); 
+                const assetSnap = await getDoc(assetRef); 
+                if (assetSnap.exists()) { 
+                    let contents = assetSnap.data().contents || []; 
+                    if (contents.length > 0) { 
+                        const reward = contents.shift();  
+                        await updateDoc(assetRef, { contents: contents, stock: contents.length }); 
+                        
+                        // Lưu lịch sử vào Firebase
+                        await addDoc(collection(db, "history"), { 
+                            uid: auth.currentUser.uid, 
+                            title: assetSnap.data().name, 
                             reward: reward, 
-                            time: serverTimestamp()
-                        });
-                        window.showReward(reward);
-                        localStorage.removeItem('pending_asset_id');
-                        window.history.replaceState({}, document.title, window.location.pathname);
-                        loadUserShop();
-                        loadHistory();
-                    }
-                }
-            }
-        }
+                            time: serverTimestamp() 
+                        }); 
 
-        window.showReward = (text) => {
-            document.getElementById('reward-box').classList.remove('hidden');
-            document.getElementById('reward-text').innerText = text;
-        };
+                        window.showReward(reward); 
+                        localStorage.removeItem('pending_asset_id'); 
+                        window.history.replaceState({}, document.title, window.location.pathname); 
+                        loadUserShop(); 
+                        loadHistory(); 
+                    } 
+                } 
+            } 
+        } 
 
-        async function loadHistory() {
+        window.showReward = (text) => { 
+            document.getElementById('reward-box').classList.remove('hidden'); 
+            document.getElementById('reward-text').innerText = text; 
+        } 
+
+        async function loadHistory() { 
             if (!auth.currentUser) return;
-            const container = document.getElementById('history-list');
-            try {
-                // Nếu loadHistory không hiện gì, hãy nhấn F12 xem Console để click vào link tạo Index của Firebase
-                const q = query(collection(db, "history"), where("uid", "==", auth.currentUser.uid), orderBy("time", "desc"));
-                const snap = await getDocs(q);
-                container.innerHTML = '';
-                snap.forEach(d => {
-                    const data = d.data();
-                    const div = document.createElement('div');
-                    div.className = "border-b border-white/10 pb-2 flex justify-between items-center";
-                    div.innerHTML = `<span>> ${data.title}</span>`;
-                    const btn = document.createElement('button');
-                    btn.className = "text-xs bg-blue-600 px-2 py-1 rounded hover:bg-blue-500";
-                    btn.innerText = "Xem lại";
-                    btn.onclick = () => window.showReward(data.reward);
-                    div.appendChild(btn);
-                    container.appendChild(div);
-                });
-            } catch (e) {
-                console.error("Lỗi History: ", e);
-                container.innerHTML = "Lỗi tải lịch sử (Có thể cần tạo Index)";
-            }
-        }
-    </script>
-</body>
+            const q = query(collection(db, "history"), where("uid", "==", auth.currentUser.uid), orderBy("time", "desc")); 
+            const snap = await getDocs(q); 
+            const container = document.getElementById('history-list'); 
+            container.innerHTML = ''; 
+            snap.forEach(d => { 
+                const data = d.data(); 
+                container.innerHTML += ` 
+                    <div class="border-b border-white/10 pb-2 flex justify-between items-center"> 
+                        <span>> ${data.title}</span> 
+                        <button onclick="showReward('${data.reward}')" class="text-xs bg-blue-600 px-2 py-1 rounded">Xem lại in4</button> 
+                    </div>`; 
+            }); 
+        } 
+    </script> 
+</body> 
 </html>
