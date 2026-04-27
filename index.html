@@ -153,7 +153,6 @@
             }
         });
 
-        // --- ADMIN GIAN HÀNG ---
         window.addBooth = async () => {
             const name = document.getElementById('booth-name').value;
             const image = document.getElementById('booth-image').value;
@@ -168,7 +167,6 @@
             loadUserShop();
         };
 
-        // --- ADMIN MẶT HÀNG ---
         window.generateInputs = () => {
             const stock = parseInt(document.getElementById('asset-stock').value) || 0;
             const container = document.getElementById('inputs-container');
@@ -198,17 +196,11 @@
             let newContents = [];
             inputs.forEach(input => { if(input.value) newContents.push(input.value); });
             if(!boothId || newContents.length === 0) return;
-            
             const boothRef = doc(db, "assets", boothId);
             const boothSnap = await getDoc(boothRef);
             const currentContents = boothSnap.data().contents || [];
             const updatedContents = currentContents.concat(newContents);
-
-            await updateDoc(boothRef, { 
-                contents: updatedContents,
-                stock: updatedContents.length 
-            });
-
+            await updateDoc(boothRef, { contents: updatedContents, stock: updatedContents.length });
             document.getElementById('asset-stock').value = '';
             document.getElementById('inputs-container').innerHTML = '';
             loadAdminData();
@@ -256,17 +248,13 @@
                             <h4 class="text-lg font-bold text-gray-800">${data.name}</h4>
                             <span class="text-xs font-bold px-2 py-1 bg-blue-100 text-blue-600 rounded">KHO: ${stock}</span>
                         </div>
-                        <button onclick="handleBuy('${d.id}', '${data.linkType}')" 
-                                class="w-full mt-4 bg-slate-800 text-white py-2 rounded-lg hover:bg-black transition">
-                            Vượt Link Nhận Hàng
-                        </button>
+                        <button onclick="handleBuy('${d.id}', '${data.linkType}')" class="w-full mt-4 bg-slate-800 text-white py-2 rounded-lg hover:bg-black transition">Vượt Link Nhận Hàng</button>
                     </div>`;
             });
         }
 
         window.handleBuy = (id, linkType) => {
             localStorage.setItem('pending_asset_id', id);
-            // Redirect luôn ko cần thông báo theo ý m
             window.location.href = `https://link4sub.com/wz9avd6mqg`; 
         };
 
@@ -283,15 +271,12 @@
                     if (contents.length > 0) {
                         const reward = contents.shift(); 
                         await updateDoc(assetRef, { contents: contents, stock: contents.length });
-                        
-                        // Lưu lịch sử kèm theo nội dung hàng để xem lại
                         await addDoc(collection(db, "history"), {
                             uid: auth.currentUser.uid,
                             title: assetSnap.data().name,
                             reward: reward, 
                             time: serverTimestamp()
                         });
-
                         window.showReward(reward);
                         localStorage.removeItem('pending_asset_id');
                         window.history.replaceState({}, document.title, window.location.pathname);
@@ -305,20 +290,27 @@
         window.showReward = (text) => {
             document.getElementById('reward-box').classList.remove('hidden');
             document.getElementById('reward-text').innerText = text;
-        }
+        };
 
         async function loadHistory() {
+            if (!auth.currentUser) return;
             const q = query(collection(db, "history"), where("uid", "==", auth.currentUser.uid), orderBy("time", "desc"));
             const snap = await getDocs(q);
             const container = document.getElementById('history-list');
             container.innerHTML = '';
             snap.forEach(d => {
                 const data = d.data();
-                container.innerHTML += `
-                    <div class="border-b border-white/10 pb-2 flex justify-between items-center">
-                        <span>> ${data.title}</span>
-                        <button onclick="showReward('${data.reward}')" class="text-xs bg-blue-600 px-2 py-1 rounded hover:bg-blue-500">Xem lại</button>
-                    </div>`;
+                const div = document.createElement('div');
+                div.className = "border-b border-white/10 pb-2 flex justify-between items-center";
+                div.innerHTML = `<span>> ${data.title}</span>`;
+                
+                const btn = document.createElement('button');
+                btn.className = "text-xs bg-blue-600 px-2 py-1 rounded hover:bg-blue-500";
+                btn.innerText = "Xem lại";
+                btn.onclick = () => window.showReward(data.reward); // Gán trực tiếp qua object
+                
+                div.appendChild(btn);
+                container.appendChild(div);
             });
         }
     </script>
