@@ -1,289 +1,222 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Auth + Gate Demo</title>
-  <style>
-    :root { color-scheme: light dark; }
-    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 0; padding: 24px; line-height: 1.5; }
-    .card { max-width: 860px; margin: 0 auto 18px; border: 1px solid #8885; border-radius: 16px; padding: 18px; }
-    input, button { font: inherit; padding: 10px 12px; border-radius: 10px; border: 1px solid #8886; }
-    input { width: 100%; box-sizing: border-box; margin-bottom: 10px; }
-    button { cursor: pointer; margin-right: 8px; margin-top: 6px; }
-    .row { display: grid; gap: 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .muted { opacity: 0.75; }
-    .hidden { display: none !important; }
-    .danger { color: #c33; }
-    .ok { color: #0a7; }
-    .hero {
-      display: grid;
-      place-items: center;
-      min-height: 220px;
-      border-radius: 18px;
-      border: 1px dashed #8887;
-      margin-top: 14px;
-      background: linear-gradient(135deg, #0000, #0001);
-      user-select: none;
-    }
-    .ugphone {
-      width: min(320px, 70vw);
-      max-width: 100%;
-      border-radius: 18px;
-      box-shadow: 0 12px 30px #0003;
-      transition: transform .12s ease;
-    }
-    .ugphone:hover { transform: scale(1.02); }
-    code, pre { white-space: pre-wrap; word-break: break-word; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop Asset & UgPhone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .hidden { display: none; }
+        .card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-bottom: 10px; }
+    </style>
 </head>
-<body>
-  <div class="card">
-    <h1>Auth + gated content demo</h1>
-    <p class="muted">
-      Bản này chỉ làm cổng đăng nhập + cổng nội dung hợp lệ. Không có cơ chế lách/bypass/blacklist ngầm, vì cái đó chỉ khiến web biến thành máy xào rủi ro.
-    </p>
-  </div>
+<body class="bg-gray-100 p-5">
 
-  <div class="card">
-    <h2>Auth</h2>
-    <div class="row">
-      <div>
-        <input id="email" placeholder="email" autocomplete="email" />
-      </div>
-      <div>
-        <input id="pass" type="password" placeholder="password" autocomplete="current-password" />
-      </div>
+    <div id="app" class="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-md">
+        <h1 class="text-2xl font-bold mb-5 text-center">Hệ Thống Bán Hàng & UgPhone</h1>
+
+        <div id="auth-section">
+            <h2 class="text-xl font-semibold mb-3">Đăng nhập / Đăng ký</h2>
+            <input type="email" id="email" placeholder="Email" class="border p-2 w-full mb-2">
+            <input type="password" id="password" placeholder="Mật khẩu" class="border p-2 w-full mb-4">
+            <button onclick="handleAuth('login')" class="bg-blue-500 text-white px-4 py-2 rounded">Đăng nhập</button>
+            <button onclick="handleAuth('register')" class="bg-green-500 text-white px-4 py-2 rounded">Đăng ký</button>
+        </div>
+
+        <div id="main-content" class="hidden">
+            <div class="flex justify-between items-center mb-5">
+                <p>Xin chào: <span id="user-email" class="font-bold"></span></p>
+                <button onclick="logout()" class="text-red-500 underline">Đăng xuất</button>
+            </div>
+
+            <div id="admin-panel" class="hidden border-2 border-red-200 p-4 mb-5 bg-red-50">
+                <h3 class="font-bold text-red-600 mb-2 text-lg">Quản lý Admin</h3>
+                <input type="text" id="asset-name" placeholder="Tên món hàng" class="border p-2 mb-2 w-full">
+                <button onclick="addAsset()" class="bg-red-500 text-white px-4 py-2 rounded">Thêm món hàng</button>
+                <div id="admin-asset-list" class="mt-4"></div>
+            </div>
+
+            <div class="mb-10">
+                <h3 class="text-xl font-bold mb-3">Cửa hàng</h3>
+                <div id="user-asset-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            </div>
+
+            <div class="border-t pt-5 text-center">
+                <h3 class="text-lg font-semibold mb-3">Nhận quà máy UgPhone</h3>
+                <a href="#" onclick="startShortlink(event)">
+                    <img src="https://www.ugphone.com/toc-portal/assets/ugphone-logo.b5e3e8d7.png" alt="UgPhone" class="mx-auto w-48 hover:opacity-80 transition cursor-pointer">
+                </a>
+                <div id="reward-box" class="hidden mt-4 p-4 bg-yellow-100 border border-yellow-400 text-yellow-800 font-mono">
+                    Đoạn văn bản: <span id="reward-text" class="font-bold text-lg"></span>
+                </div>
+            </div>
+
+            <div class="mt-10">
+                <h3 class="text-xl font-bold mb-3 text-gray-700">Lịch sử hoạt động</h3>
+                <div id="history-list" class="text-sm bg-gray-50 p-4 rounded h-40 overflow-y-auto"></div>
+            </div>
+        </div>
     </div>
 
-    <div>
-      <button id="signup">Sign up</button>
-      <button id="login">Login</button>
-      <button id="logout">Logout</button>
-      <button id="refreshAccess">Refresh access</button>
-    </div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-    <p id="status" class="muted">Chưa kết nối</p>
-    <pre id="debug"></pre>
-  </div>
+        // Cấu hình của bạn
+        const firebaseConfig = {
+            apiKey: "AIzaSyDfge8mXfEn_PgmrK3HYtNzOsbSdShn6_g",
+            authDomain: "skibidi-37b6d.firebaseapp.com",
+            projectId: "skibidi-37b6d",
+            appId: "1:1087339530724:web:1a175582477528c8a99ff1"
+        };
 
-  <div class="card">
-    <h2>Landing</h2>
-    <p class="muted">Nút bên dưới là chỗ m gắn flow mua/verify hợp pháp của m. Server mới là thằng quyết định, chứ client thì sửa phát là xong chuyện đời.</p>
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-    <div class="hero">
-      <img
-        id="ugphoneBtn"
-        class="ugphone"
-        alt="UGPhone"
-        src="https://dummyimage.com/900x520/111/ffffff.png&text=UGPHONE"
-      />
-    </div>
+        // ĐỊNH NGHĨA ADMIN (Thay Email này bằng email admin của bạn)
+        const ADMIN_EMAIL = "admin@example.com"; 
 
-    <p id="gateInfo" class="muted">Chưa xác thực.</p>
-  </div>
+        // 1. Quản lý Đăng nhập / Đăng ký
+        window.handleAuth = async (type) => {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            try {
+                if (type === 'login') await signInWithEmailAndPassword(auth, email, pass);
+                else await createUserWithEmailAndPassword(auth, email, pass);
+            } catch (error) { alert(error.message); }
+        };
 
-  <div class="card hidden" id="rewardCard">
-    <h2>Reward / local page</h2>
-    <p class="ok">Đã mở khóa hợp lệ.</p>
-    <p>
-      Tại đây m có thể render local content, personal dashboard, notes, hoặc trang tiếp theo.
-      Nếu chưa verified từ server thì không mở phần này.
-    </p>
-    <pre id="localBox"></pre>
-  </div>
+        window.logout = () => signOut(auth);
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import {
-      getAuth,
-      createUserWithEmailAndPassword,
-      signInWithEmailAndPassword,
-      signOut,
-      onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyDfge8mXfEn_PgmrK3HYtNzOsbSdShn6_g",
-      authDomain: "skibidi-37b6d.firebaseapp.com",
-      projectId: "skibidi-37b6d",
-      appId: "1:1087339530724:web:1a175582477528c8a99ff1"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-
-    const emailEl = document.getElementById("email");
-    const passEl = document.getElementById("pass");
-    const statusEl = document.getElementById("status");
-    const debugEl = document.getElementById("debug");
-    const gateInfoEl = document.getElementById("gateInfo");
-    const rewardCard = document.getElementById("rewardCard");
-    const localBox = document.getElementById("localBox");
-    const ugphoneBtn = document.getElementById("ugphoneBtn");
-
-    let currentUser = null;
-    let accessState = {
-      verified: false,
-      blocked: false,
-      reason: "not_loaded"
-    };
-
-    function setStatus(msg, cls = "muted") {
-      statusEl.className = cls;
-      statusEl.textContent = msg;
-    }
-
-    function setGateInfo(msg, cls = "muted") {
-      gateInfoEl.className = cls;
-      gateInfoEl.textContent = msg;
-    }
-
-    function showReward(visible) {
-      rewardCard.classList.toggle("hidden", !visible);
-    }
-
-    function renderDebug() {
-      debugEl.textContent = JSON.stringify({
-        uid: currentUser?.uid ?? null,
-        email: currentUser?.email ?? null,
-        accessState
-      }, null, 2);
-    }
-
-    async function fetchAccessState() {
-      if (!currentUser) {
-        accessState = { verified: false, blocked: false, reason: "no_user" };
-        showReward(false);
-        setGateInfo("Chưa login.", "muted");
-        renderDebug();
-        return;
-      }
-
-      try {
-        // TODO: thay endpoint này = backend thật của m.
-        // Backend nên trả:
-        // { verified: true/false, blocked: true/false, reason: "..." }
-        const res = await fetch(`/api/me?uid=${encodeURIComponent(currentUser.uid)}`, {
-          credentials: "include",
-          cache: "no-store"
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('auth-section').classList.add('hidden');
+                document.getElementById('main-content').classList.remove('hidden');
+                document.getElementById('user-email').innerText = user.email;
+                
+                if (user.email === ADMIN_EMAIL) {
+                    document.getElementById('admin-panel').classList.remove('hidden');
+                    loadAdminAssets();
+                }
+                loadUserAssets();
+                loadHistory();
+                checkVượtLink(); // Kiểm tra xem vừa mới vượt link xong hay không
+            } else {
+                document.getElementById('auth-section').classList.remove('hidden');
+                document.getElementById('main-content').classList.add('hidden');
+            }
         });
 
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-        const data = await res.json();
-        accessState = {
-          verified: !!data.verified,
-          blocked: !!data.blocked,
-          reason: String(data.reason ?? "ok")
+        // 2. Quản lý Hàng hóa (Admin)
+        window.addAsset = async () => {
+            const name = document.getElementById('asset-name').value;
+            if (!name) return;
+            await addDoc(collection(db, "assets"), { name, createdAt: serverTimestamp() });
+            document.getElementById('asset-name').value = '';
+            loadAdminAssets();
+            loadUserAssets();
         };
-      } catch (err) {
-        // Demo fallback. Đừng dùng kiểu này cho production, trừ khi m thích tự mở cửa nhà rồi ngạc nhiên vì mất đồ.
-        accessState = {
-          verified: false,
-          blocked: false,
-          reason: `backend_unavailable: ${err?.message ?? "unknown"}`
+
+        async function loadAdminAssets() {
+            const snap = await getDocs(collection(db, "assets"));
+            const container = document.getElementById('admin-asset-list');
+            container.innerHTML = '';
+            snap.forEach(d => {
+                container.innerHTML += `
+                    <div class="flex justify-between bg-white p-2 mb-1 border">
+                        <span>${d.data().name}</span>
+                        <button onclick="deleteAsset('${d.id}')" class="text-red-500 font-bold">Xóa</button>
+                    </div>`;
+            });
+        }
+
+        window.deleteAsset = async (id) => {
+            await deleteDoc(doc(db, "assets", id));
+            loadAdminAssets();
+            loadUserAssets();
         };
-      }
 
-      if (accessState.blocked) {
-        showReward(false);
-        setGateInfo("Tài khoản này bị chặn bởi policy của hệ thống.", "danger");
-        setStatus("Blocked", "danger");
-      } else if (accessState.verified) {
-        showReward(true);
-        setGateInfo("Đã xác thực. Mở reward.", "ok");
-        setStatus(`Logged in as ${currentUser.email} | verified`, "ok");
-        localBox.textContent = [
-          `uid: ${currentUser.uid}`,
-          `email: ${currentUser.email}`,
-          `local timestamp: ${new Date().toISOString()}`,
-          `note: phần local của m hiển thị ở đây`
-        ].join("\n");
-      } else {
-        showReward(false);
-        setGateInfo("Chưa có xác thực hợp lệ. Quay về home.", "muted");
-        setStatus(`Logged in as ${currentUser.email} | not verified`, "muted");
-      }
+        // 3. Hiển thị cho User
+        async function loadUserAssets() {
+            const snap = await getDocs(collection(db, "assets"));
+            const container = document.getElementById('user-asset-list');
+            container.innerHTML = '';
+            snap.forEach(d => {
+                container.innerHTML += `
+                    <div class="card bg-blue-50 border-blue-200">
+                        <p class="font-bold">${d.data().name}</p>
+                        <button onclick="buyAsset('${d.data().name}')" class="mt-2 text-sm bg-blue-600 text-white px-3 py-1 rounded">Mua ngay</button>
+                    </div>`;
+            });
+        }
 
-      renderDebug();
-    }
+        window.buyAsset = async (name) => {
+            await addDoc(collection(db, "history"), {
+                uid: auth.currentUser.uid,
+                email: auth.currentUser.email,
+                type: "MUA HÀNG",
+                content: `Đã mua: ${name}`,
+                time: serverTimestamp()
+            });
+            alert("Đã mua thành công!");
+            loadHistory();
+        };
 
-    document.getElementById("signup").onclick = async () => {
-      try {
-        await createUserWithEmailAndPassword(auth, emailEl.value, passEl.value);
-        setStatus("Signed up", "ok");
-      } catch (e) {
-        setStatus(e.message, "danger");
-      }
-    };
+        // 4. Hệ thống Vượt Link (Logic Anti-Bypass)
+        window.startShortlink = (e) => {
+            e.preventDefault();
+            // Tạo 1 token ngẫu nhiên để xác minh khi quay lại
+            const token = Math.random().toString(36).substring(7);
+            localStorage.setItem('pending_verify', token);
+            
+            // Link vượt link (Ở đây bạn thay bằng link rút gọn của bạn)
+            // Cấu hình trang đích sau khi vượt link là: URL_CUA_BAN?token=TOKEN_CỦA_BẠN
+            const shortlinkUrl = `https://your-shortlink.com/redirect?dest=${encodeURIComponent(window.location.origin + window.location.pathname + '?verify=' + token)}`;
+            
+            window.location.href = shortlinkUrl;
+        };
 
-    document.getElementById("login").onclick = async () => {
-      try {
-        await signInWithEmailAndPassword(auth, emailEl.value, passEl.value);
-        setStatus("Logged in", "ok");
-      } catch (e) {
-        setStatus(e.message, "danger");
-      }
-    };
+        async function checkVượtLink() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const verifyToken = urlParams.get('verify');
+            const savedToken = localStorage.getItem('pending_verify');
 
-    document.getElementById("logout").onclick = async () => {
-      try {
-        await signOut(auth);
-        setStatus("Logged out", "muted");
-      } catch (e) {
-        setStatus(e.message, "danger");
-      }
-    };
+            // Chống bypass: Token trong URL phải khớp với Token đã lưu trong máy trước khi đi
+            if (verifyToken && verifyToken === savedToken) {
+                // Xóa token để không dùng lại được lần 2 (Anti-replay)
+                localStorage.removeItem('pending_verify');
+                // Xóa param trên URL cho đẹp
+                window.history.replaceState({}, document.title, window.location.pathname);
 
-    document.getElementById("refreshAccess").onclick = async () => {
-      await fetchAccessState();
-    };
+                // Hiển thị đoạn văn bản
+                document.getElementById('reward-box').classList.remove('hidden');
+                document.getElementById('reward-text').innerText = "local máy ugphone - [SECRET-KEY-123]";
 
-    ugphoneBtn.addEventListener("click", async () => {
-      // Chỗ này chỉ là chỗ bấm nút của landing.
-      // Luồng thật: tạo session/token ở server, chuyển qua trang verify hợp lệ, rồi server mới set verified.
-      // Không nhét blacklist/bypass logic kiểu stealth ở đây.
-      if (!currentUser) {
-        setStatus("Phải login trước đã.", "danger");
-        return;
-      }
+                // Lưu vào lịch sử
+                await addDoc(collection(db, "history"), {
+                    uid: auth.currentUser.uid,
+                    email: auth.currentUser.email,
+                    type: "VƯỢT LINK",
+                    content: "Đã vượt link nhận quà UgPhone",
+                    time: serverTimestamp()
+                });
+                loadHistory();
+            }
+        }
 
-      setStatus("Đang kiểm tra quyền truy cập...", "muted");
-      await fetchAccessState();
-
-      if (accessState.blocked) {
-        location.replace("/");
-        return;
-      }
-
-      if (accessState.verified) {
-        showReward(true);
-        location.hash = "#reward";
-      } else {
-        // Chưa verified thì quay về home, đúng kiểu gate bình thường.
-        location.replace("/");
-      }
-    });
-
-    onAuthStateChanged(auth, async (user) => {
-      currentUser = user ?? null;
-
-      if (!user) {
-        accessState = { verified: false, blocked: false, reason: "signed_out" };
-        showReward(false);
-        setStatus("Not logged in", "muted");
-        setGateInfo("Chưa login.", "muted");
-        renderDebug();
-        return;
-      }
-
-      await fetchAccessState();
-    });
-
-    // Mặc định giữ reward ẩn cho tới khi server xác nhận.
-    showReward(false);
-    renderDebug();
-  </script>
+        // 5. Lịch sử
+        async function loadHistory() {
+            const q = query(collection(db, "history"), where("uid", "==", auth.currentUser.uid));
+            const snap = await getDocs(q);
+            const container = document.getElementById('history-list');
+            container.innerHTML = '';
+            snap.forEach(d => {
+                const data = d.data();
+                container.innerHTML += `<p class="border-b mb-1">[${data.type}] ${data.content}</p>`;
+            });
+        }
+    </script>
 </body>
 </html>
