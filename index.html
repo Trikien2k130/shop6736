@@ -34,37 +34,22 @@
             </div>
 
             <div id="admin-panel" class="hidden mb-10">
-                <h2 class="text-2xl font-bold text-red-600 mb-4 flex items-center gap-2">
+                <h2 class="text-2xl font-bold text-blue-600 mb-4 flex items-center gap-2">
                     <span>🛠️</span> QUẢN TRỊ VIÊN
                 </h2>
                 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="bg-blue-50 p-6 rounded-xl border border-blue-100">
-                        <h3 class="font-bold mb-4 text-blue-700">Tạo Gian Hàng</h3>
+                        <h3 class="font-bold mb-4 text-blue-700">Thêm Mặt Hàng</h3>
                         <div class="space-y-3">
-                            <input type="text" id="booth-name" placeholder="Tên gian hàng (VD: Blox Fruits VIP)" class="w-full border p-2 rounded">
-                            <input type="text" id="booth-image" placeholder="Link ảnh gian hàng (hoặc dùng upload)" class="w-full border p-2 rounded text-sm">
-                            <select id="booth-link-type" class="w-full border p-2 rounded">
-                                <option value="link4sub">Link: Link4Sub</option>
-                                <option value="link4m">Link: Link4M</option>
-                            </select>
-                            <button onclick="addBooth()" class="w-full bg-blue-600 text-white py-2 rounded font-bold hover:bg-blue-700">THÊM GIAN HÀNG</button>
-                        </div>
-                        <div id="admin-booth-list" class="mt-4 space-y-2 max-h-40 overflow-y-auto">
-                            </div>
-                    </div>
-
-                    <div class="bg-red-50 p-6 rounded-xl border border-red-100">
-                        <h3 class="font-bold mb-4 text-red-700">Thêm Mặt Hàng</h3>
-                        <div class="space-y-3">
-                            <select id="select-booth" class="w-full border p-2 rounded font-bold text-red-600">
+                            <select id="select-booth" class="w-full border p-2 rounded font-bold text-blue-600">
                                 <option value="">-- Chọn Gian Hàng --</option>
                             </select>
                             
                             <div class="flex gap-2">
                                 <input type="number" id="asset-stock" oninput="generateInputs()" placeholder="Số lượng" class="flex-1 border p-2 rounded">
-                                <label class="bg-green-600 text-white px-3 py-2 rounded cursor-pointer text-sm">
-                                    Upload File .txt (Nhiều file)
+                                <label class="bg-blue-500 text-white px-3 py-2 rounded cursor-pointer text-xs flex items-center">
+                                    UP FILE .TXT
                                     <input type="file" id="file-upload" accept=".txt" multiple class="hidden" onchange="handleFileUpload()">
                                 </label>
                             </div>
@@ -73,7 +58,22 @@
                                 <p class="text-gray-400 text-xs col-span-2 text-center">Nhập thủ công hoặc up file</p>
                             </div>
 
-                            <button onclick="addItemsToBooth()" class="w-full bg-red-600 text-white py-2 rounded font-bold hover:bg-red-700">NHẬP KHO</button>
+                            <button onclick="addItemsToBooth()" class="w-full bg-blue-600 text-white py-2 rounded font-bold hover:bg-blue-700">NHẬP KHO</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-50 p-6 rounded-xl border border-blue-100">
+                        <h3 class="font-bold mb-4 text-blue-700">Tạo Gian Hàng</h3>
+                        <div class="space-y-3">
+                            <input type="text" id="booth-name" placeholder="Tên gian hàng (VD: Blox Fruits VIP)" class="w-full border p-2 rounded">
+                            <input type="text" id="booth-image" placeholder="Link ảnh gian hàng" class="w-full border p-2 rounded text-sm">
+                            <select id="booth-link-type" class="w-full border p-2 rounded text-sm">
+                                <option value="link4sub">Loại link: Link4Sub</option>
+                                <option value="link4m">Loại link: Link4M</option>
+                            </select>
+                            <button onclick="addBooth()" class="w-full bg-blue-600 text-white py-2 rounded font-bold hover:bg-blue-700">THÊM GIAN HÀNG</button>
+                        </div>
+                        <div id="admin-booth-list" class="mt-4 space-y-2 max-h-32 overflow-y-auto">
                         </div>
                     </div>
                 </div>
@@ -82,7 +82,7 @@
             <div class="mb-10">
                 <h3 class="text-2xl font-bold mb-6 text-gray-800 border-l-4 border-blue-600 pl-3">Cửa Hàng Sản Phẩm</h3>
                 <div id="user-asset-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    </div>
+                </div>
             </div>
 
             <div id="reward-box" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
@@ -91,7 +91,7 @@
                     <h3 class="text-xl font-bold mb-2 text-green-600">Thông tin của bạn!</h3>
                     <p class="text-gray-600 mb-4">Vui lòng copy lại nội dung này:</p>
                     <div id="reward-text" class="bg-slate-100 p-4 rounded-lg font-mono text-blue-700 break-all mb-4 border border-blue-200"></div>
-                    <button onclick="document.getElementById('reward-box').classList.add('hidden')" class="w-full bg-blue-600 text-white py-2 rounded">Đóng</button>
+                    <button onclick="document.getElementById('reward-box').classList.add('hidden')" class="w-full bg-blue-600 text-white py-2 rounded font-bold">Đóng</button>
                 </div>
             </div>
 
@@ -111,7 +111,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where, serverTimestamp, updateDoc, arrayUnion, getDoc, orderBy } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where, serverTimestamp, updateDoc, getDoc, orderBy } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDfge8mXfEn_PgmrK3HYtNzOsbSdShn6_g",
@@ -125,7 +125,6 @@
         const db = getFirestore(app);
         const ADMIN_EMAIL = "trikien14012013@gmail.com"; 
 
-        // --- AUTH ---
         window.handleAuth = async (type) => {
             const email = document.getElementById('email').value;
             const pass = document.getElementById('password').value;
@@ -154,27 +153,28 @@
             }
         });
 
-        // --- ADMIN: GIAN HÀNG (BOOTH) ---
+        // --- ADMIN GIAN HÀNG ---
         window.addBooth = async () => {
             const name = document.getElementById('booth-name').value;
             const image = document.getElementById('booth-image').value;
             const linkType = document.getElementById('booth-link-type').value;
-            if(!name) return alert("Nhập tên gian hàng!");
+            if(!name) return;
             await addDoc(collection(db, "assets"), {
                 name, image, linkType, contents: [], stock: 0, createdAt: serverTimestamp()
             });
             document.getElementById('booth-name').value = '';
+            document.getElementById('booth-image').value = '';
             loadAdminData();
             loadUserShop();
         };
 
-        // --- ADMIN: MẶT HÀNG (ITEMS) ---
+        // --- ADMIN MẶT HÀNG ---
         window.generateInputs = () => {
             const stock = parseInt(document.getElementById('asset-stock').value) || 0;
             const container = document.getElementById('inputs-container');
             container.innerHTML = '';
             for(let i = 1; i <= stock; i++) {
-                container.innerHTML += `<input type="text" class="input-item-data input-item" placeholder="Mặt hàng ${i}">`;
+                container.innerHTML += `<input type="text" class="input-item-data input-item" placeholder="Dòng nội dung ${i}">`;
             }
         };
 
@@ -197,8 +197,7 @@
             const inputs = document.querySelectorAll('.input-item-data');
             let newContents = [];
             inputs.forEach(input => { if(input.value) newContents.push(input.value); });
-            
-            if(!boothId || newContents.length === 0) return alert("Chọn gian hàng và nhập hàng!");
+            if(!boothId || newContents.length === 0) return;
             
             const boothRef = doc(db, "assets", boothId);
             const boothSnap = await getDoc(boothRef);
@@ -210,31 +209,25 @@
                 stock: updatedContents.length 
             });
 
-            alert("Đã nhập hàng thành công!");
             document.getElementById('asset-stock').value = '';
             document.getElementById('inputs-container').innerHTML = '';
             loadAdminData();
             loadUserShop();
         };
 
-        // --- LOAD DATA ---
         async function loadAdminData() {
             const snap = await getDocs(collection(db, "assets"));
             const select = document.getElementById('select-booth');
             const adminList = document.getElementById('admin-booth-list');
             select.innerHTML = '<option value="">-- Chọn Gian Hàng --</option>';
             adminList.innerHTML = '';
-
             snap.forEach(d => {
                 const data = d.data();
                 select.innerHTML += `<option value="${d.id}">${data.name} (Kho: ${data.stock})</option>`;
-                adminList.innerHTML += `
-                    <div class="bg-white p-2 rounded border text-sm flex justify-between items-center text-black">
-                        <span>${data.name}</span>
-                        <div class="flex gap-2">
-                            <button onclick="deleteBooth('${d.id}')" class="text-red-500">Xóa</button>
-                        </div>
-                    </div>`;
+                adminList.innerHTML += `<div class="bg-white p-2 rounded border text-xs flex justify-between items-center text-black">
+                    <span>${data.name}</span>
+                    <button onclick="deleteBooth('${d.id}')" class="text-red-500 font-bold">XÓA</button>
+                </div>`;
             });
         }
 
@@ -250,15 +243,11 @@
             const snap = await getDocs(collection(db, "assets"));
             const container = document.getElementById('user-asset-list');
             container.innerHTML = '';
-            
             snap.forEach(d => {
                 const data = d.data();
                 const stock = data.stock || 0;
-                
-                // Ẩn với khách nếu hết hàng, Admin vẫn thấy
                 const isAdmin = auth.currentUser?.email === ADMIN_EMAIL;
                 if (stock <= 0 && !isAdmin) return;
-
                 container.innerHTML += `
                     <div class="card bg-white p-5 rounded-xl border border-slate-200 relative overflow-hidden">
                         ${stock <= 0 ? '<div class="absolute inset-0 bg-white/60 flex items-center justify-center font-bold text-red-500 z-10">HẾT HÀNG</div>' : ''}
@@ -275,12 +264,10 @@
             });
         }
 
-        // --- LOGIC MUA & CHECK ---
         window.handleBuy = (id, linkType) => {
             localStorage.setItem('pending_asset_id', id);
-            const shortlinkUrl = `https://link4sub.com/wz9avd6mqg`; // Link mẫu của Tri Kien
-            alert(`Đang chuyển hướng qua ${linkType}...`);
-            window.location.href = shortlinkUrl;
+            // Redirect luôn ko cần thông báo theo ý m
+            window.location.href = `https://link4sub.com/wz9avd6mqg`; 
         };
 
         async function checkVerification() {
@@ -296,13 +283,16 @@
                     if (contents.length > 0) {
                         const reward = contents.shift(); 
                         await updateDoc(assetRef, { contents: contents, stock: contents.length });
-                        window.showReward(reward);
+                        
+                        // Lưu lịch sử kèm theo nội dung hàng để xem lại
                         await addDoc(collection(db, "history"), {
                             uid: auth.currentUser.uid,
                             title: assetSnap.data().name,
-                            reward: reward,
+                            reward: reward, 
                             time: serverTimestamp()
                         });
+
+                        window.showReward(reward);
                         localStorage.removeItem('pending_asset_id');
                         window.history.replaceState({}, document.title, window.location.pathname);
                         loadUserShop();
@@ -327,7 +317,7 @@
                 container.innerHTML += `
                     <div class="border-b border-white/10 pb-2 flex justify-between items-center">
                         <span>> ${data.title}</span>
-                        <button onclick="showReward('${data.reward}')" class="text-xs bg-blue-600 px-2 py-1 rounded">Xem lại</button>
+                        <button onclick="showReward('${data.reward}')" class="text-xs bg-blue-600 px-2 py-1 rounded hover:bg-blue-500">Xem lại</button>
                     </div>`;
             });
         }
