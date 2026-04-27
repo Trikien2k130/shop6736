@@ -9,6 +9,7 @@
         .hidden { display: none; }
         .card { border: 1px solid #e2e8f0; transition: all 0.3s; }
         .card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        .input-item { font-size: 12px; padding: 4px; border: 1px solid #ccc; border-radius: 4px; width: 100%; }
     </style>
 </head>
 <body class="bg-slate-50 p-4 md:p-8">
@@ -41,9 +42,19 @@
                         <h3 class="font-bold mb-4">Thêm Sản Phẩm Mới</h3>
                         <div class="space-y-3">
                             <input type="text" id="asset-name" placeholder="Tên sản phẩm (VD: UgPhone VIP 1)" class="w-full border p-2 rounded">
-                            <input type="number" id="asset-stock" placeholder="Số lượng" class="w-full border p-2 rounded">
-                            <textarea id="asset-content" placeholder="Nội dung bí mật (Local máy / Link Acc)" class="w-full border p-2 rounded h-20"></textarea>
                             
+                            <div class="flex gap-2">
+                                <input type="number" id="asset-stock" oninput="generateInputs()" placeholder="Số lượng (VD: 36)" class="flex-1 border p-2 rounded">
+                                <label class="bg-blue-500 text-white px-3 py-2 rounded cursor-pointer text-sm">
+                                    Upload File .txt
+                                    <input type="file" id="file-upload" accept=".txt" class="hidden" onchange="handleFileUpload()">
+                                </label>
+                            </div>
+
+                            <div id="inputs-container" class="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto border p-2 bg-white rounded">
+                                <p class="text-gray-400 text-xs col-span-3 text-center">Nhập số lượng để hiện các ô nhập liệu</p>
+                            </div>
+
                             <div class="grid grid-cols-2 gap-2">
                                 <select id="asset-type" class="border p-2 rounded">
                                     <option value="ugphone">Loại: UgPhone</option>
@@ -61,7 +72,7 @@
                     <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
                         <h3 class="font-bold mb-4">Kho Hàng Hiện Tại</h3>
                         <div id="admin-asset-list" class="space-y-2 h-[300px] overflow-y-auto pr-2">
-                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -69,7 +80,7 @@
             <div class="mb-10">
                 <h3 class="text-2xl font-bold mb-6 text-gray-800 border-l-4 border-blue-600 pl-3">Cửa Hàng Sản Phẩm</h3>
                 <div id="user-asset-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    </div>
+                </div>
             </div>
 
             <div id="reward-box" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
@@ -87,7 +98,7 @@
                     <span class="text-green-400">●</span> Lịch sử hoạt động
                 </h3>
                 <div id="history-list" class="space-y-2 font-mono text-sm h-40 overflow-y-auto text-gray-300">
-                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -95,7 +106,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where, serverTimestamp, updateDoc, increment } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where, serverTimestamp, updateDoc, increment, getDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDfge8mXfEn_PgmrK3HYtNzOsbSdShn6_g",
@@ -109,6 +120,33 @@
         const db = getFirestore(app);
 
         const ADMIN_EMAIL = "trikien14012013@gmail.com"; 
+
+        // Hàm tạo các ô nhập liệu dựa trên số lượng
+        window.generateInputs = () => {
+            const stock = parseInt(document.getElementById('asset-stock').value) || 0;
+            const container = document.getElementById('inputs-container');
+            container.innerHTML = '';
+            for(let i = 1; i <= stock; i++) {
+                container.innerHTML += `<input type="text" class="input-item-data input-item" placeholder="Dòng ${i}">`;
+            }
+        };
+
+        // Hàm đọc file .txt
+        window.handleFileUpload = () => {
+            const file = document.getElementById('file-upload').files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const lines = e.target.result.split('\n').filter(line => line.trim() !== "");
+                document.getElementById('asset-stock').value = lines.length;
+                generateInputs();
+                const inputs = document.querySelectorAll('.input-item-data');
+                lines.forEach((line, index) => {
+                    if(inputs[index]) inputs[index].value = line.trim();
+                });
+            };
+            reader.readAsText(file);
+        };
 
         window.handleAuth = async (type) => {
             const email = document.getElementById('email').value;
@@ -139,31 +177,31 @@
             }
         });
 
-        // ADMIN: THÊM HÀNG
         window.addAsset = async () => {
             const name = document.getElementById('asset-name').value;
             const stock = parseInt(document.getElementById('asset-stock').value);
-            const content = document.getElementById('asset-content').value;
+            const inputs = document.querySelectorAll('.input-item-data');
             const type = document.getElementById('asset-type').value;
             const linkType = document.getElementById('link-type').value;
 
-            if (!name || isNaN(stock) || !content) return alert("Điền đủ thông tin!");
+            // Gom toàn bộ nội dung trong các ô thành mảng
+            let contents = [];
+            inputs.forEach(input => { if(input.value) contents.push(input.value); });
+
+            if (!name || isNaN(stock) || contents.length === 0) return alert("Điền đủ thông tin!");
 
             await addDoc(collection(db, "assets"), {
-                name, stock, content, type, linkType,
+                name, stock, contents, type, linkType,
                 createdAt: serverTimestamp()
             });
 
-            // Reset form
             document.getElementById('asset-name').value = '';
             document.getElementById('asset-stock').value = '';
-            document.getElementById('asset-content').value = '';
-            
+            document.getElementById('inputs-container').innerHTML = '';
             loadAdminAssets();
             loadUserAssets();
         };
 
-        // ADMIN: LOAD DANH SÁCH (THẤY CẢ NỘI DUNG)
         async function loadAdminAssets() {
             const snap = await getDocs(collection(db, "assets"));
             const container = document.getElementById('admin-asset-list');
@@ -174,9 +212,8 @@
                     <div class="bg-white p-3 border rounded shadow-sm flex flex-col gap-1">
                         <div class="flex justify-between font-bold">
                             <span>[${data.type.toUpperCase()}] ${data.name}</span>
-                            <span class="text-red-500">SL: ${data.stock}</span>
+                            <span class="text-red-500">Kho: ${data.contents ? data.contents.length : 0}</span>
                         </div>
-                        <p class="text-xs text-gray-500 italic">Nội dung: ${data.content}</p>
                         <div class="flex justify-end gap-2 mt-1">
                              <button onclick="deleteAsset('${d.id}')" class="text-xs text-red-500 underline">Xóa</button>
                         </div>
@@ -192,20 +229,20 @@
             }
         };
 
-        // USER: LOAD SHOP (ẨN MÓN HẾT HÀNG)
         async function loadUserAssets() {
             const snap = await getDocs(collection(db, "assets"));
             const container = document.getElementById('user-asset-list');
             container.innerHTML = '';
             snap.forEach(d => {
                 const data = d.data();
-                if (data.stock <= 0) return; // Ẩn nếu hết hàng
+                const stock = data.contents ? data.contents.length : 0;
+                if (stock <= 0) return; 
 
                 container.innerHTML += `
                     <div class="card bg-white p-5 rounded-xl border border-slate-200">
                         <div class="flex justify-between items-start mb-3">
                             <span class="bg-blue-100 text-blue-600 text-xs font-bold px-2 py-1 rounded">${data.type.toUpperCase()}</span>
-                            <span class="text-sm font-medium text-gray-500">Còn lại: ${data.stock}</span>
+                            <span class="text-sm font-medium text-gray-500">Còn lại: ${stock}</span>
                         </div>
                         <h4 class="text-lg font-bold text-gray-800 mb-4">${data.name}</h4>
                         <button onclick="handleBuy('${d.id}', '${data.linkType}')" 
@@ -216,64 +253,48 @@
             });
         }
 
-        // XỬ LÝ KHI BẤM "MUA" (VƯỢT LINK)
         window.handleBuy = (id, linkType) => {
-            // Lưu lại ID món hàng đang định lấy
             localStorage.setItem('pending_asset_id', id);
-            
-            // Tạo mã xác minh chống bypass
             const token = "TRIKIEN_" + Math.random().toString(36).substring(7).toUpperCase();
             localStorage.setItem('pending_verify', token);
-            
-            // Ở đây mình dùng link của bạn cung cấp
-            // Sau này bạn có thể làm nhiều link khác nhau dựa vào linkType
-            const shortlinkUrl = `https://link4sub.com/wz9avd6mqg`; 
-            
-            alert(`Hệ thống đang chuyển hướng qua ${linkType}. Sau khi hoàn thành, bạn sẽ tự động nhận nội dung!`);
+            const shortlinkUrl = `https://link4sub.com/uuwz9avd6mqg`; 
+            alert(`Đang chuyển hướng qua ${linkType}...`);
             window.location.href = shortlinkUrl;
         };
 
-        // KIỂM TRA SAU KHI VƯỢT LINK QUAY LẠI
         async function checkVerification() {
             const urlParams = new URLSearchParams(window.location.search);
             const verifyToken = urlParams.get('verify');
-            const savedToken = localStorage.getItem('pending_verify');
             const assetId = localStorage.getItem('pending_asset_id');
 
-            if (verifyToken && verifyToken === "TOKEN" && assetId) { // Vì link của bạn đang để cứng là ?verify=TOKEN
-                
-                // 1. Lấy thông tin món hàng
+            if (verifyToken === "TOKEN" && assetId) { 
                 const assetRef = doc(db, "assets", assetId);
-                const assetSnap = await getDocs(query(collection(db, "assets"))); 
-                
-                // Tìm đúng document trong list (vì lấy lẻ doc cần quyền hoặc cấu trúc chuẩn hơn)
-                let itemData = null;
-                assetSnap.forEach(doc => { if(doc.id === assetId) itemData = doc.data(); });
+                const assetSnap = await getDoc(assetRef);
 
-                if (itemData && itemData.stock > 0) {
-                    // 2. Trừ số lượng trong kho
-                    await updateDoc(assetRef, { stock: increment(-1) });
+                if (assetSnap.exists()) {
+                    let data = assetSnap.data();
+                    let contents = data.contents || [];
 
-                    // 3. Hiển thị quà
-                    document.getElementById('reward-box').classList.remove('hidden');
-                    document.getElementById('reward-text').innerText = itemData.content;
+                    if (contents.length > 0) {
+                        const reward = contents.shift(); // Lấy món đầu tiên ra
+                        await updateDoc(assetRef, { contents: contents, stock: contents.length });
 
-                    // 4. Lưu lịch sử
-                    await addDoc(collection(db, "history"), {
-                        uid: auth.currentUser.uid,
-                        email: auth.currentUser.email,
-                        content: `Vượt link nhận: ${itemData.name}`,
-                        type: "SUCCESS",
-                        time: serverTimestamp()
-                    });
+                        document.getElementById('reward-box').classList.remove('hidden');
+                        document.getElementById('reward-text').innerText = reward;
 
-                    // Dọn dẹp
-                    localStorage.removeItem('pending_asset_id');
-                    localStorage.removeItem('pending_verify');
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                    
-                    loadUserAssets();
-                    loadHistory();
+                        await addDoc(collection(db, "history"), {
+                            uid: auth.currentUser.uid,
+                            email: auth.currentUser.email,
+                            content: `Nhận thành công 1 món từ: ${data.name}`,
+                            type: "SUCCESS",
+                            time: serverTimestamp()
+                        });
+
+                        localStorage.removeItem('pending_asset_id');
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                        loadUserAssets();
+                        loadHistory();
+                    }
                 }
             }
         }
